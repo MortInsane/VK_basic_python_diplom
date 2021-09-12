@@ -57,16 +57,17 @@ class VK:
                 str_date = item['date']
                 str_date = datetime.fromtimestamp(str_date).strftime("%d-%m-%Y_%H%M%S")
 
-                data.setdefault("results", list())
+                data.setdefault("results", dict())
                 data["id"] = user_id
                 data["first_name"] = first_name
                 data["last_name"] = last_name
                 data["user_name"] = self.user
 
                 if f"{likes}.jpg" not in data["results"]:
-                    data["results"].append({"file_name": f"{likes}.jpg", "photo_type": photo_type, "photo_url": max_size_url})
-                else:
-                    data["results"].append({"file_name": f"{likes}_{str_date}.jpg", "photo_type": photo_type, "photo_url": max_size_url})
 
-            with open(f'{self.user}-{first_name} {last_name}-{user_id}.json', 'w') as f:
+                    data["results"][f"{likes}.jpg"] = {"photo_type": photo_type, "photo_url": max_size_url}
+                else:
+                    data["results"][f"{likes}_{str_date}.jpg"] = {"photo_type": photo_type, "photo_url": max_size_url}
+
+            with open(f'files/{self.user}-{first_name} {last_name}-{user_id}.json', 'w') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
