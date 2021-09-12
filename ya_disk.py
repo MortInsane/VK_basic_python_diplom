@@ -4,16 +4,18 @@ import os
 
 
 class YandexDisk:
-    def __init__(self, token, json_path):
+    def __init__(self, token, json_path, user_folder):
         self.token = token
         self.json_path = json_path
+        self.user_folder = user_folder
 
     def _get_data_by_json(self):
         data = dict()
-        json_files_list = os.listdir(self.json_path)
+        path = os.path.join(self.json_path, self.user_folder)
+        json_files_list = os.listdir(path)
 
         for json_file in json_files_list:
-            json_file_path = os.path.join(self.json_path, json_file)
+            json_file_path = os.path.join(path, json_file)
             with open(json_file_path) as f:
                 data = json.load(f)
         return data
@@ -31,7 +33,6 @@ class YandexDisk:
         root_dir = ""
 
         for index, folder in enumerate(folders):
-
             if index == 0:
                 params = {
                     "path": folder

@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import requests
 import json
@@ -69,5 +70,10 @@ class VK:
                 else:
                     data["results"][f"{likes}_{str_date}.jpg"] = {"photo_type": photo_type, "photo_url": max_size_url}
 
-            with open(f'files/{self.user}-{first_name} {last_name}-{user_id}.json', 'w') as f:
+            file_name = f"files/{self.user}/{self.user}-{first_name} {last_name}-{user_id}.json"
+
+            if not os.path.exists(os.path.dirname(file_name)):
+                os.makedirs(os.path.dirname(file_name))
+
+            with open(file_name, 'w') as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
