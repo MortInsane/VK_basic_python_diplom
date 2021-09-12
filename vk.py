@@ -3,10 +3,6 @@ import requests
 import json
 
 
-TOKEN = ""
-username = ""
-
-
 class VK:
     def __init__(self, token, version, user):
         self.token = token
@@ -37,6 +33,8 @@ class VK:
         users_data = self._get_id_by_username()
 
         for user_id, user_data in users_data.items():
+            first_name = user_data["first_name"]
+            last_name = user_data["last_name"]
 
             params = {
                 "album_id": "profile",
@@ -59,14 +57,16 @@ class VK:
                 str_date = item['date']
                 str_date = datetime.fromtimestamp(str_date).strftime("%d-%m-%Y_%H%M%S")
 
-                if user_id not in data:
-                    data[user_id] = {}
+                data.setdefault("results", list())
+                data["id"] = user_id
+                data["first_name"] = first_name
+                data["last_name"] = last_name
+                data["user_name"] = self.user
 
-                if f"{likes}.jpg" not in data[user_id]:
-
-                    data[user_id][f"{likes}.jpg"] = {"photo_type": photo_type, "photo_url": max_size_url}
+                if f"{likes}.jpg" not in data["results"]:
+                    data["results"].append({"file_name": f"{likes}.jpg", "photo_type": photo_type, "photo_url": max_size_url})
                 else:
-                    data[user_id][f"{likes}_{str_date}.jpg"] = {"photo_type": photo_type, "photo_url": max_size_url}
+                    data["results"].append({"file_name": f"{likes}_{str_date}.jpg", "photo_type": photo_type, "photo_url": max_size_url})
 
-            with open(f'{self.user}-{user_id}_result.json', 'w') as f:
-                json.dump(data, f, indent=2)
+            with open(f'{self.user}-{first_name} {last_name}-{user_id}.json', 'w') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
