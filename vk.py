@@ -5,10 +5,11 @@ import json
 
 
 class VK:
-    def __init__(self, token, version, user):
+    def __init__(self, token, version, user, count_to_upload=5):
         self.token = token
         self.version = version
         self.user = user
+        self.count_to_upload = count_to_upload
 
     def _get_id_by_username(self):
         data = {}
@@ -47,6 +48,28 @@ class VK:
 
             url = f"https://api.vk.com/method/photos.get"
             response = requests.get(url, params=params, timeout=5).json()
+            all_count = response["response"]["count"]
+
+            if self.count_to_upload < 1:
+                print("Количество файлов для загрузки не может быть меньше 1")
+                return
+
+            if self.count_to_upload > all_count:
+                print(f"Количество файлов для загрузки не может быть больше {all_count}")
+                return
+
+            params = {
+                "album_id": "profile",
+                "extended": 1,
+                "access_token": self.token,
+                "v": self.version,
+                "owner_id": user_id,
+                "count": self.count_to_upload
+            }
+
+            url = f"https://api.vk.com/method/photos.get"
+            response = requests.get(url, params=params, timeout=5).json()
+
             base_json = response['response']['items']
 
             for item in base_json:
