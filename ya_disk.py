@@ -1,6 +1,7 @@
 import requests
 import json
 import os
+from datetime import datetime
 
 
 class YandexDisk:
@@ -12,12 +13,21 @@ class YandexDisk:
     def _get_data_by_json(self):
         data = dict()
         path = os.path.join(self.json_path, self.user_folder)
+
+        if not os.path.exists(path):
+            return False
+
         json_files_list = os.listdir(path)
 
         for json_file in json_files_list:
             json_file_path = os.path.join(path, json_file)
-            with open(json_file_path) as f:
-                data = json.load(f)
+
+            if not os.path.isdir(json_file_path):
+                if not os.path.exists(json_file_path):
+                    return False
+
+                with open(json_file_path) as f:
+                    data = json.load(f)
         return data
 
     def _get_headers(self):
@@ -61,6 +71,10 @@ class YandexDisk:
     def upload(self):
         data = self._get_data_by_json()
 
+        if not data:
+            print("Нет файлов для загрузки")
+            return
+
         results = data["results"]
         first_name = data['first_name']
         last_name = data['last_name']
@@ -86,7 +100,16 @@ class YandexDisk:
                 print(f"Загрузка файла {file_name} произошла успешно")
         print("Загрузка всех файлов завершена")
 
+        # Перемещение файлов в папку резервного копирования
+        base_url = os.path.join(self.json_path, self.user_folder)
+        backup_path = os.path.join(base_url, "backup")
+        date_backup = datetime.now().strftime("%m-%d-%Y %H%M%S")
 
-
-
+        if not os.path.exists(backup_path):
+            os.makedirs(backup_path)
+            os.rename(f"{base_url}\\{user_name}-{first_name} {last_name}-{id_}.json",
+                      f"{backup_path}\\{user_name}-{first_name} {last_name}-{id_}_{date_backup}.json")
+        else:
+            os.rename(f"{base_url}\\{user_name}-{first_name} {last_name}-{id_}.json",
+                      f"{backup_path}\\{user_name}-{first_name} {last_name}-{id_}_{date_backup}.json")
 
